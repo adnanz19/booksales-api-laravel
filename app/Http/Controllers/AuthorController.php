@@ -10,6 +10,14 @@ class AuthorController extends Controller
     public function index(){
         $authors = Author::all();
 
+        if ($authors->isEmpty()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Data not found",
+                
+            ], 200);
+        }
+
         return response()->json([
             "success" => true,
             "message" => "Get all resource",

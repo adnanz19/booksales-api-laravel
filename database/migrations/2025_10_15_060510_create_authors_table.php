@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('bio');
-            $table->date('photo');
+            $table->string('photo');
             $table->timestamps();
         });
     }
