@@ -105,10 +105,73 @@ class TransactionController extends Controller
     }
 
     public function update(Request $request, string $id){
-        
+        $transaction = Transaction::find($id);
+
+        if (!$transaction) {
+            return response()->json([
+                "success" => false,
+                "message" => "Resource not found",
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'book_id' => 'required|exists:books,id',
+            'quantity' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => $validator->errors(),
+            ], 422);
+        }
+
+        $book = Book::find($request->book_id);
+
+        if ($book->stock < $request->quantity) {
+            return response()->json([
+                "success" => false,
+                "message" => "Stock not enough",
+            ], 400);
+        }
+
+        $oldBook = Book::find($transaction->book_id);
+        $oldBook->stock += ($transaction->total_amount / $oldBook->price); 
+        $oldBook->save();
+
+        $book->stock -= $request->quantity; 
+        $book->save();
+        $transaction->total_amount = $book->price * $request->quantity;
+        $transaction->save();
+
+        return response()->json([
+            "success" => true,
+            "message" => "Transaction updated successfully",
+            "data" => $transaction,
+        ], 200);
     }
 
     public function destroy(string $id){
-        
+        $transaction = Transaction::find($id);
+
+        if (!$transaction) {
+            return response()->json([
+                "success" => false,
+                "message" => "Resource not found",
+            ], 404);
+        }
+
+        $book = Book::find($transaction->book_id);
+        if ($book) {
+            $book->stock += ($transaction->total_amount / $book->price);
+            $book->save();
+        }
+
+        $transaction->delete();
+
+        return response()->json([
+            "success" => true,
+            "message" => "Transaction deleted successfully",
+        ], 200);
     }
 }
