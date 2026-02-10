@@ -8,7 +8,9 @@ class Author extends Model
 {
     protected $table = 'authors';
 
-    public function books(){
-        return $this->hasMany('Book');
-    }
+    protected $fillable = [
+        'name',
+        'bio',
+        'photo',
+    ];
 }

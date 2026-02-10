@@ -8,7 +8,8 @@ class Genre extends Model
 {
     protected $table = 'genres';
 
-    public function books(){
-        return $this->hasMany('Book');
-    }
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 }
